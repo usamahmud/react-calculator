@@ -21,8 +21,8 @@ h1 {
 .display-container {
   display: flex;
   align-items: stretch;
-  height: 20%;
-  width: 100%;
+  height: 17%;
+  width: 99%;
 }
 
 .display {
@@ -37,7 +37,7 @@ h1 {
   display: flex;
   align-items: stretch;
   height: 15%;
-  width: 100%;
+  width: 99%;
 }
 
 button {

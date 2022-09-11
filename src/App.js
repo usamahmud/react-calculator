@@ -125,7 +125,6 @@ function App() {
     } else {
       // cannot add operator before equals is pressed => do nothing
     }
-    
   }
 
   const decimal = () => {

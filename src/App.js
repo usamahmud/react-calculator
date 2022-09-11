@@ -138,7 +138,7 @@ function App() {
     } else if (op !== null && valTwo === null) {
       setValTwo(0)
       setValDisplay('0.')
-    } else if (valDisplay.indexOf('.') !== -1) {
+    } else if (valDisplay.indexOf('.') === -1) {
       setValDisplay(valDisplay + '.')
     }
   }
@@ -186,13 +186,12 @@ function App() {
         setValDisplay('Error')
       }
     }
-    
   }
 
 
   return (
     <div className='calculator'>
-      <h1>Calculator</h1>
+      <h1 className='unselectable'>Calculator</h1>
       <div className='display-container'>
         <Display text={valDisplay} />
       </div>

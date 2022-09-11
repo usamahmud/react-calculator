@@ -72,16 +72,16 @@ function App() {
     if (op === null) {
       // val1 is num, op is null, val2 is null => negate val1
       const newVal = valOne * -1
-      setValOne(parseFloat(newVal))
-      setValDisplay(newVal)
+      setValOne(newVal)
+      setValDisplay(newVal.toString())
     } else if (valTwo === null) {
       // val1 is num, op is op, val2 is null => do nothing
 
     } else {
       // val1 is num, op is op, val2 is num => negate val2
       const newVal = valTwo * -1
-      setValTwo(parseFloat(newVal))
-      setValDisplay(newVal)
+      setValTwo(newVal)
+      setValDisplay(newVal.toString())
     }
   }
 

@@ -10,6 +10,7 @@ function App() {
   const [op, setOp] = useState(null)
   const [valTwo, setValTwo] = useState(null)
   const [valDisplay, setValDisplay] = useState('0')
+  const [endResult, setEndResult] = useState(false)
 
   useEffect(() => {}, [valOne, op, valTwo, valDisplay])
 
@@ -18,6 +19,7 @@ function App() {
     setOp(null)
     setValTwo(null)
     setValDisplay('0')
+    setEndResult(false)
   }
 
   const backspace = () => {
@@ -40,34 +42,6 @@ function App() {
     }
   }
 
-  const insertDigit = (digit) => {
-    // need to check if equals is last button pressed, if so, new digit should not be appended
-
-    if (op === null) {
-      // val1 is num, op is null, val2 is null => append to val1
-      if (valOne === 0) {
-        const newVal = digit
-        setValOne(parseFloat(newVal))
-        setValDisplay(newVal)
-      } else if (valDisplay.replace(/[^0-9]/g, '').length < 10) {
-        const newVal = valDisplay + digit
-        setValOne(parseFloat(newVal))
-        setValDisplay(newVal)
-      }
-    } else {
-      // val1 is num, op is op, val2 is num/null => append to val2
-      if (valTwo === null || valTwo === 0) {
-        const newVal = digit
-        setValTwo(parseFloat(newVal))
-        setValDisplay(newVal)
-      } else if (valDisplay.replace(/[^0-9]/g, '').length < 10) {
-        const newVal = valDisplay + digit
-        setValTwo(parseFloat(newVal))
-        setValDisplay(newVal)
-      }
-    }
-  }
-
   const negate = () => {
     if (op === null) {
       // val1 is num, op is null, val2 is null => negate val1
@@ -86,45 +60,130 @@ function App() {
   }
 
   const squareRoot = () => {
+
     if (op === null) {
-      const newVal = Math.sqrt(valOne)
-      setValOne(newVal)
-      setValDisplay(newVal.toString())
+      setEndResult(true)
+
+      let newVal = Math.sqrt(valOne)
+      if (Number.isNaN(newVal)) {
+        // undefined square root
+        setValOne(0)
+        setValDisplay('Error')
+      } else {
+        // defined square root
+        setValOne(newVal)
+        newVal = newVal.toString()
+        const extraDigits = newVal.replace(/[^0-9]/g, '').length - 10
+        if (extraDigits > 0)
+          newVal = newVal.slice(0, -1 * extraDigits)
+        newVal = newVal.replace(/^(-*[0-9]+)$|^(-*[0-9]+)\.0*$|^(-*[0-9]+\.[0-9]*?)0*$/g, '$1$2$3')
+        setValDisplay(newVal)
+      }
     } else {
       // do nothing
     }
-    // check if valOne < 0 => NaN
+  }
+
+  const insertDigit = (digit) => {
+    // need to check if equals is last button pressed, if so, new digit should not be appended
+
+    if (endResult) {
+      setValOne(parseFloat(digit))
+      setOp(null)
+      setValTwo(null)
+      setValDisplay(digit)
+      setEndResult(false)
+    } else if (op === null) {
+      // val1 is num, op is null, val2 is null => append to val1
+      if (valDisplay === '0') {
+        const newVal = digit
+        setValOne(parseFloat(newVal))
+        setValDisplay(newVal)
+      } else if (valDisplay.replace(/[^0-9]/g, '').length < 10) {
+        const newVal = valDisplay + digit
+        setValOne(parseFloat(newVal))
+        setValDisplay(newVal)
+      }
+    } else {
+      // val1 is num, op is op, val2 is num/null => append to val2
+      if (valTwo === null || valDisplay === '0') {
+        const newVal = digit
+        setValTwo(parseFloat(newVal))
+        setValDisplay(newVal)
+      } else if (valDisplay.replace(/[^0-9]/g, '').length < 10) {
+        const newVal = valDisplay + digit
+        setValTwo(parseFloat(newVal))
+        setValDisplay(newVal)
+      }
+    }
   }
 
   const insertOperator = (operator) => {
     if (valTwo === null) {
       setOp(operator)
+      setEndResult(false)
     } else {
       // cannot add operator before equals is pressed => do nothing
     }
     
   }
 
+  const decimal = () => {
+    if (endResult || (valDisplay === '0' && op === null) ) {
+      setValOne(0)
+      setOp(null)
+      setValTwo(null)
+      setValDisplay('0.')
+      setEndResult(false)
+    } else if (op !== null && valTwo === null) {
+      setValTwo(0)
+      setValDisplay('0.')
+    } else if (valDisplay.indexOf('.') !== -1) {
+      setValDisplay(valDisplay + '.')
+    }
+  }
+
   const equals = () => {
     if (op === null) {
       // val1 is num, op is null, val2 is null => output val1
-      
+      setEndResult(true)
     } else if (valTwo != null) {
       // val1 is num, op is op, val2 is num => do calculation
+      setEndResult(true)
       let newVal = 0
       switch (op) {
         case 'divide':
           newVal = valOne / valTwo
-          if (newVal)
           break
         case 'times':
+          newVal = valOne * valTwo
           break
         case 'minus':
+          newVal = valOne - valTwo
           break
         case 'plus':
+          newVal = valOne + valTwo
           break
         default:
           break
+      }
+
+      setOp(null)
+      setValTwo(null)
+
+      if (Math.round(newVal) < 10000000000 && Math.round(newVal) > -10000000000) {
+        // result in range
+        setValOne(newVal)
+        newVal = newVal.toString()
+        const extraDigits = newVal.replace(/[^0-9]/g, '').length - 10
+        if (extraDigits > 0)
+          newVal = newVal.slice(0, -1 * extraDigits)
+        newVal = newVal.replace(/^(-*[0-9]+)$|^(-*[0-9]+)\.0*$|^(-*[0-9]+\.[0-9]*?)0*$/g, '$1$2$3')
+        setValDisplay(newVal)
+      } else {
+        // result out of range
+        setValOne(0)
+        setValDisplay('Error')
       }
     }
     
@@ -163,8 +222,8 @@ function App() {
       </div>
       <div className='container'>
         <Button keyFunction='0' text='0' onClick={insertDigit} />
-        <Button keyFunction='.' text='.' keyType='decimal' />
-        <Button keyFunction='=' text={<FaEquals size={20} />} keyType='equal' />
+        <Button keyFunction='.' text='.' keyType='decimal' onClick={decimal} />
+        <Button keyFunction='=' text={<FaEquals size={20} />} keyType='equal' onClick={equals} />
         <Button keyFunction='plus' text={<FaPlus size={20} />} keyType='operator' onClick={insertOperator} />
       </div>
     </div>
